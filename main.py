@@ -1,7 +1,10 @@
+import openai
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI()
+
+openai.api_key = "SUA_CHAVE_OPENAI"
 
 class Dados(BaseModel):
     ambiente: str
@@ -9,6 +12,11 @@ class Dados(BaseModel):
 
 @app.post("/ambientacao")
 def gerar(dados: Dados):
-    # Aqui você conecta com seu agente gerador de imagens
-    # Por enquanto, devolvemos uma imagem de teste
-    return {"url_imagem": "https://picsum.photos/600/400"}
+    prompt = f"Uma ambientação de {dados.ambiente} com {dados.revestimento}"
+    result = openai.images.generate(
+        model="gpt-image-1",
+        prompt=prompt,
+        size="1024x1024"
+    )
+    url = result.data[0].url
+    return {"url_imagem": url}
