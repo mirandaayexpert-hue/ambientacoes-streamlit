@@ -22,12 +22,4 @@ def gerar(dados: Dados):
             size="1024x1024"
         )
 
-        # Garante que existe pelo menos uma imagem
-        if result and "data" in result and len(result.data) > 0:
-            url = result.data[0].url
-            return {"url_imagem": url}
-        else:
-            return {"erro": "Nenhuma imagem foi gerada pela API."}
-
-    except Exception as e:
-        return {"erro": str(e)}
+        # Log para debug (aparece nos logs do Railway)
