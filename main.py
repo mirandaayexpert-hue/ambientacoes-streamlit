@@ -4,35 +4,31 @@ from pydantic import BaseModel
 from openai import OpenAI
 
 app = FastAPI()
-
-# Lê a chave da OpenAI das variáveis de ambiente
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Modelo de dados que a API recebe
 class Dados(BaseModel):
     ambiente: str
     revestimento: str
 
-# Endpoint principal
 @app.post("/ambientacao")
 def gerar(dados: Dados):
     try:
-        # Prompt mais detalhado para melhorar a qualidade da imagem
-        prompt = (
-            f"Renderização realista de {dados.ambiente} "
-            f"com revestimento em {dados.revestimento}, "
-            f"estilo moderno, iluminação natural suave, "
-            f"perspectiva arquitetônica detalhada"
-        )
+        # Prompt simples e objetivo
+        prompt = f"Renderização realista de {dados.ambiente} com revestimento em {dados.revestimento}, estilo moderno"
 
-        # Chamada à API da OpenAI para gerar imagem
         result = client.images.generate(
             model="gpt-image-1",
             prompt=prompt,
             size="1024x1024"
         )
 
-        # Log para debug (aparece nos logs do Railway)
         print("Resposta OpenAI:", result)
 
-        # Garante que existe
+        if result.data and len(result.data) > 0 and hasattr(result.data[0], "url"):
+            return {"url_imagem": result.data[0].url}
+        else:
+            return {"url_imagem": None, "erro": "Nenhuma imagem foi gerada."}
+
+    except Exception as e:
+        # Captura qualquer erro e evita 502
+        return {"url_imagem": None, "erro": f"Erro na API: {str(e)}"}
