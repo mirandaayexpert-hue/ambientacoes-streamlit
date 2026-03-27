@@ -16,10 +16,17 @@ def gerar(dados: Dados):
     try:
         prompt = f"Uma ambientação de {dados.ambiente} com {dados.revestimento}"
 
-        result = openai.images.generate(
-            model="gpt-image-1",
+        # Forma compatível com versões mais antigas da lib
+        result = openai.Image.create(
             prompt=prompt,
             size="1024x1024"
         )
 
-        # Log para debug (aparece nos logs do Railway)
+        if "data" in result and len(result["data"]) > 0:
+            url = result["data"][0]["url"]
+            return {"url_imagem": url}
+        else:
+            return {"erro": "Nenhuma imagem foi gerada."}
+
+    except Exception as e:
+        return {"erro": str(e)}
