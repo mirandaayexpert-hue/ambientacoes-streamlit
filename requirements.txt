@@ -1,5 +1,5 @@
-openai==0.28
 fastapi
 uvicorn
 requests
 streamlit
+openai==0.28
