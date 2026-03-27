@@ -13,8 +13,8 @@ class Dados(BaseModel):
 @app.post("/ambientacao")
 def gerar(dados: Dados):
     try:
-        # Prompt simples e objetivo
-        prompt = f"Renderização realista de {dados.ambiente} com revestimento em {dados.revestimento}, estilo moderno"
+        # Prompt mínimo e direto
+        prompt = f"{dados.ambiente} com revestimento em {dados.revestimento}"
 
         result = client.images.generate(
             model="gpt-image-1",
@@ -24,11 +24,11 @@ def gerar(dados: Dados):
 
         print("Resposta OpenAI:", result)
 
-        if result.data and len(result.data) > 0 and hasattr(result.data[0], "url"):
+        if result and result.data and len(result.data) > 0 and hasattr(result.data[0], "url"):
             return {"url_imagem": result.data[0].url}
         else:
             return {"url_imagem": None, "erro": "Nenhuma imagem foi gerada."}
 
     except Exception as e:
         # Captura qualquer erro e evita 502
-        return {"url_imagem": None, "erro": f"Erro na API: {str(e)}"}
+        return {"url_imagem": None, "erro": f"Erro na API ou na conexão: {str(e)}"}
