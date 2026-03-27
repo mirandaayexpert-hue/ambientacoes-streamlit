@@ -9,20 +9,16 @@ revestimento = st.text_input("Revestimento:")
 if st.button("Gerar Imagem"):
     st.write(f"Gerando ambientação para {ambiente} com {revestimento}...")
 
-    # Faz a chamada ao seu agente no Railway
+    # Chamada à API no Railway
     resp = requests.post(
-        "https://primary-production-2a5a7.up.railway.app/webhook-test/ambientacao",
-        json={
-            "ambiente": ambiente,
-            "revestimento": revestimento
-        }
+        "https://ambientacoes-streamlit-production.up.railway.app/ambientacao",
+        json={"ambiente": ambiente, "revestimento": revestimento}
     )
 
-    # Se sua API devolve um JSON com a URL da imagem
     if resp.status_code == 200:
         dados = resp.json()
         if "url_imagem" in dados:
-            st.image(dados["url_imagem"])
+            st.image(dados["url_imagem"], caption="Ambientação gerada")
         else:
             st.write("Resposta recebida, mas não encontrei a chave 'url_imagem'.")
     else:
