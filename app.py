@@ -5,10 +5,17 @@ import io
 
 st.title("Gerador de Ambientações")
 
-# Campos de entrada
+# Lista de ambientes válidos
+ambientes_validos = ["sala", "cozinha", "quarto", "banheiro", "escritorio", "varanda"]
+
+# Campo de entrada normalizado
 ambiente = st.text_input("Ambiente").strip().lower()
 superficie = st.text_input("Superfície")
 revestimento = st.text_input("Revestimento")
+
+# Se não for válido, força para "sala"
+if ambiente not in ambientes_validos:
+    ambiente = "sala"
 
 # Campo de upload de imagem
 uploaded_file = st.file_uploader("Envie sua própria imagem", type=["png", "jpg", "jpeg"])
@@ -41,7 +48,7 @@ if st.button("Gerar ambientação"):
     if response.status_code == 200:
         try:
             img = Image.open(io.BytesIO(response.content))
-            st.image(img, caption="Ambientação gerada")
+            st.image(img, caption=f"Ambientação gerada ({ambiente})")
         except Exception as e:
             st.error(f"Não foi possível abrir a imagem retornada: {e}")
     else:
