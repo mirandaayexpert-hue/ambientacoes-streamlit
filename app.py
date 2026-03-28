@@ -1,32 +1,40 @@
 import streamlit as st
 import requests
+from PIL import Image
+import io
 
 st.title("Gerador de Ambientações")
 
 # Campos de entrada
-ambiente = st.text_input("Ambiente:")
-revestimento = st.text_input("Revestimento:")
+ambiente = st.text_input("Ambiente")
+superficie = st.text_input("Superfície")
+revestimento = st.text_input("Revestimento")
 
-# Botão para gerar imagem
-if st.button("Gerar Imagem"):
-    st.write(f"Gerando ambientação para {ambiente} com {revestimento}...")
+# Campo de upload de imagem
+uploaded_file = st.file_uploader("Envie sua própria imagem", type=["png", "jpg", "jpeg"])
 
-    try:
-        # Chamada à API hospedada no Railway
-        resp = requests.post(
-            "https://ambientacoes-streamlit-production.up.railway.app/ambientacao",
-            json={"ambiente": ambiente, "revestimento": revestimento}
-        )
+# Botão de envio
+if st.button("Gerar ambientação"):
+    # Monta os dados
+    data = {
+        "superficie": superficie,
+        "revestimento": revestimento
+    }
 
-        if resp.status_code == 200:
-            dados = resp.json()
-            # Só mostra a imagem se realmente existir uma URL válida
-            if dados.get("url_imagem"):
-                st.image(dados["url_imagem"], caption="Ambientação gerada")
-            else:
-                st.error("Não foi possível gerar a imagem. Detalhes: " + str(dados.get("erro")))
-        else:
-            st.error("Erro ao chamar a API: " + str(resp.status_code))
+    # Se o usuário enviou uma imagem, manda como arquivo
+    if uploaded_file is not None:
+        files = {"ambiente": uploaded_file.getvalue()}
+        response = requests.post("URL_DO_SEU_WEBHOOK", data=data, files=files)
+    else:
+        # Caso não tenha upload, só manda os parâmetros
+        response = requests.post("URL_DO_SEU_WEBHOOK", json=data)
 
-    except Exception as e:
-        st.error("Erro inesperado: " + str(e))
+    # Exibe a imagem retornada
+    if response.status_code == 200:
+        try:
+            img = Image.open(io.BytesIO(response.content))
+            st.image(img, caption="Ambientação gerada")
+        except Exception:
+            st.error("Não foi possível abrir a imagem retornada.")
+    else:
+        st.error(f"Erro na requisição: {response.status_code}")
