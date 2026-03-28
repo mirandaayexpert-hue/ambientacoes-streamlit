@@ -25,14 +25,14 @@ if st.button("Gerar ambientação"):
     if uploaded_file is not None:
         files = {"ambiente": uploaded_file.getvalue()}
         response = requests.post(
-            "https://primary-production-2a5a7.up.railway.app/webhook-test/simulacao-revestimento",
+            "https://primary-production-2a5a7.up.railway.app/webhook/simulacao-revestimento",
             data=data,
             files=files
         )
     else:
         # Caso não tenha upload, só manda os parâmetros
         response = requests.post(
-            "https://primary-production-2a5a7.up.railway.app/webhook-test/simulacao-revestimento",
+            "https://primary-production-2a5a7.up.railway.app/webhook/simulacao-revestimento",
             json=data
         )
 
