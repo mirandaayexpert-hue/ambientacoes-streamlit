@@ -6,7 +6,7 @@ import io
 st.title("Gerador de Ambientações")
 
 # Campos de entrada
-ambiente = st.text_input("Ambiente")
+ambiente = st.text_input("Ambiente").strip().lower()
 superficie = st.text_input("Superfície")
 revestimento = st.text_input("Revestimento")
 
@@ -17,6 +17,7 @@ uploaded_file = st.file_uploader("Envie sua própria imagem", type=["png", "jpg"
 if st.button("Gerar ambientação"):
     # Monta os dados
     data = {
+        "ambiente": ambiente,
         "superficie": superficie,
         "revestimento": revestimento
     }
@@ -32,16 +33,4 @@ if st.button("Gerar ambientação"):
     else:
         # Caso não tenha upload, só manda os parâmetros
         response = requests.post(
-            "https://primary-production-2a5a7.up.railway.app/webhook/simulacao-revestimento",
-            json=data
-        )
-
-    # Exibe a imagem retornada
-    if response.status_code == 200:
-        try:
-            img = Image.open(io.BytesIO(response.content))
-            st.image(img, caption="Ambientação gerada")
-        except Exception as e:
-            st.error(f"Não foi possível abrir a imagem retornada: {e}")
-    else:
-        st.error(f"Erro na requisição: {response.status_code}")
+            "https://primary-production-2a5a
