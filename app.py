@@ -1,55 +1,40 @@
 import streamlit as st
 import requests
-from PIL import Image
-import io
+import json
 
-st.title("Gerador de Ambientações")
+st.title("Simulação de Revestimento")
 
-# Lista de ambientes válidos
-ambientes_validos = ["sala", "cozinha", "quarto", "banheiro", "escritorio", "varanda"]
+# Inputs do usuário
+ambiente = st.selectbox("Escolha o ambiente", ["sala", "cozinha", "quarto", "banheiro", "escritorio", "varanda"])
+superficie = st.selectbox("Escolha a superfície", ["parede", "piso", "teto"])
+revestimento = st.text_input("Digite o revestimento desejado")
+uploaded_file = st.file_uploader("Envie uma imagem do ambiente (opcional)", type=["jpg", "jpeg", "png"])
 
-# Campo de entrada normalizado
-ambiente = st.text_input("Ambiente").strip().lower()
-superficie = st.text_input("Superfície")
-revestimento = st.text_input("Revestimento")
-
-# Se não for válido, força para "sala"
-if ambiente not in ambientes_validos:
-    ambiente = "sala"
-
-# Campo de upload de imagem
-uploaded_file = st.file_uploader("Envie sua própria imagem", type=["png", "jpg", "jpeg"])
-
-# Botão de envio
-if st.button("Gerar ambientação"):
-    # Monta os dados
+# Botão para enviar
+if st.button("Simular"):
     data = {
         "ambiente": ambiente,
         "superficie": superficie,
         "revestimento": revestimento
     }
 
-    # Se o usuário enviou uma imagem, manda como arquivo
     if uploaded_file is not None:
-        files = {"ambiente": uploaded_file.getvalue()}
+        files = {"imagem": uploaded_file.getvalue()}
         response = requests.post(
             "https://primary-production-2a5a7.up.railway.app/webhook/simulacao-revestimento",
-            data=data,
+            data={"json": json.dumps(data)},  # força envio dos campos como JSON
             files=files
         )
     else:
-        # Caso não tenha upload, só manda os parâmetros
         response = requests.post(
             "https://primary-production-2a5a7.up.railway.app/webhook/simulacao-revestimento",
             json=data
         )
 
-    # Exibe a imagem retornada
+    # Exibir resultado
     if response.status_code == 200:
-        try:
-            img = Image.open(io.BytesIO(response.content))
-            st.image(img, caption=f"Ambientação gerada ({ambiente})")
-        except Exception as e:
-            st.error(f"Não foi possível abrir a imagem retornada: {e}")
+        st.success("Requisição enviada com sucesso!")
+        st.write(response.json())
     else:
         st.error(f"Erro na requisição: {response.status_code}")
+        st.write(response.text)
